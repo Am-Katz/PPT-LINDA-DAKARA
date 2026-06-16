@@ -289,72 +289,82 @@
         .small-logo-img { width: 75px; height: 75px; object-fit: contain; border: none; background: transparent; }
 
         /* ============================================ */
-        /* PERBAIKAN UNTUK HP - HILANGKAN GAMBAR */
+        /* PERBAIKAN UNTUK HP - PORTRAIT & LANDSCAPE */
         /* ============================================ */
         @media (max-width: 932px) {
-            html, body { font-size: 16px; overflow: hidden; }
+            html, body { font-size: 14px; overflow: hidden; }
             .horizontal-container { height: 100vh; width: 100vw; }
-            .slide-section { padding: 0 5% !important; justify-content: center !important; align-items: center !important; }
+            .slide-section { padding: 0 4% !important; justify-content: center !important; align-items: center !important; }
 
             /* SEMBUNYIKAN SEMUA GAMBAR/HIASAN KECUALI LOGO UTAMA */
-            .ornament-wrapper,
-            .photo-stack-right,
-            .isu-photo-grid,
-            .result-stack-wrapper,
-            .small-trash,
-            .doc-img-wrapper {
+            .ornament-wrapper, .photo-stack-right, .isu-photo-grid, .result-stack-wrapper, .small-trash, .doc-img-wrapper {
                 display: none !important;
             }
 
-            /* PASTIKAN LOGO AWAL TETAP MUNCUL */
             .logo-row, .small-logo-img, .splash-logo-main {
                 display: flex !important;
             }
 
-            /* Layout Card Jadi Full Width di HP karena gambar hilang */
             .glass-card, .card-results, .glass-card-doc {
-                max-width: 95% !important;
-                width: 95% !important;
-                padding: 1.8rem !important;
+                max-width: 98% !important;
+                width: 96% !important;
+                padding: 1.5rem !important;
                 margin: 0 auto !important;
-                max-height: 85vh !important;
+                max-height: 88vh !important;
                 overflow-y: auto;
-                border-radius: 30px !important;
+                border-radius: 25px !important;
+                border-width: 3px !important;
             }
 
-            /* Penyesuaian Dokumentasi */
-            .doc-entry-row {
-                flex-direction: column !important;
-                gap: 15px !important;
-                margin-bottom: 35px !important;
-                padding: 10px !important;
-                text-align: center;
-            }
+            .doc-entry-row { flex-direction: column !important; gap: 10px !important; margin-bottom: 30px !important; padding: 10px !important; text-align: center; }
             .doc-content-wrapper { flex: 1 !important; width: 100%; }
 
-            /* Ukuran Teks Mobile agar pas */
-            h1 { font-size: 2.5rem !important; }
+            h1 { font-size: 2.2rem !important; }
             h2 { 
-                font-size: 2.2rem !important; 
-                -webkit-text-stroke: 5px var(--text-dark) !important;
+                font-size: 2rem !important; 
+                -webkit-text-stroke: 4px var(--text-dark) !important;
                 justify-content: center;
+                margin-bottom: 1.5rem !important;
             }
             .game-title { 
-                font-size: 3.8rem !important; 
-                -webkit-text-stroke: 12px var(--text-dark) !important;
+                font-size: 3.5rem !important; 
+                -webkit-text-stroke: 10px var(--text-dark) !important;
                 white-space: normal !important;
                 text-align: center !important;
             }
-            .game-subtitle { font-size: 1.6rem !important; padding: 6px 20px !important; }
-            p { font-size: 1.1rem !important; }
-            .list-item { font-size: 1.1rem !important; padding: 12px 15px !important; }
+            .game-subtitle { font-size: 1.4rem !important; padding: 5px 15px !important; }
+            p { font-size: 1rem !important; }
+            .list-item { font-size: 1rem !important; padding: 10px 12px !important; margin-bottom: 10px !important; }
             
-            /* Navigasi Kecil */
-            .side-btn { width: 45px !important; height: 45px !important; }
-            .nav-dots { bottom: 20px !important; }
+            .side-btn { width: 40px !important; height: 40px !important; font-size: 1.2rem !important; }
+            .nav-dots { bottom: 15px !important; }
         }
 
-        @media (max-width: 480px) {
+        /* --- KHUSUS PERBAIKAN LANDSCAPE HP AGAR TIDAK NGEZOOM --- */
+        @media (max-width: 932px) and (max-height: 500px) {
+            .glass-card {
+                padding: 1rem 1.5rem !important;
+                max-height: 82vh !important;
+            }
+            h2 { 
+                font-size: 1.6rem !important; 
+                margin-bottom: 0.8rem !important; 
+                -webkit-text-stroke: 3px var(--text-dark) !important;
+            }
+            .game-title { font-size: 2.5rem !important; -webkit-text-stroke: 7px var(--text-dark) !important; margin-bottom: 5px !important; }
+            .game-subtitle { font-size: 1.1rem !important; }
+            .badge-eco { margin-bottom: 0.5rem !important; font-size: 1rem !important; padding: 5px 15px !important; }
+            .list-item { font-size: 0.95rem !important; padding: 6px 10px !important; margin-bottom: 6px !important; }
+            .logo-row { margin-top: 10px !important; }
+            .small-logo-img { width: 40px !important; height: 40px !important; }
+            .splash-logo-main { width: 120px !important; margin-bottom: 10px !important; }
+            .splash-team-name { font-size: 2.5rem !important; }
+            .splash-school-name { font-size: 1.2rem !important; margin-bottom: 15px !important; }
+            .play-btn { width: 70px !important; height: 70px !important; font-size: 2rem !important; }
+            .side-btn { width: 35px !important; height: 35px !important; }
+        }
+
+        @media (max-width: 480px) and (orientation: portrait) {
             .game-title { font-size: 2.8rem !important; -webkit-text-stroke: 8px var(--text-dark) !important; }
             h2 { font-size: 1.8rem !important; }
             .glass-card { padding: 1.4rem !important; }
@@ -382,8 +392,8 @@
 
     <div id="interactive-bg"></div>
     <div class="nav-dots" id="dotNav"></div>
-    <button class="side-btn" style="left: 25px;" onclick="slide(-1)"><i class="fas fa-chevron-left"></i></button>
-    <button class="side-btn" style="right: 25px;" onclick="slide(1)"><i class="fas fa-chevron-right"></i></button>
+    <button class="side-btn" style="left: 15px;" onclick="slide(-1)"><i class="fas fa-chevron-left"></i></button>
+    <button class="side-btn" style="right: 15px;" onclick="slide(1)"><i class="fas fa-chevron-right"></i></button>
 
     <div class="horizontal-container" id="slider">
         
@@ -394,7 +404,7 @@
             </div>
             
             <div class="glass-card" style="margin: 0; z-index: 10;">
-                <span class="badge-eco reveal" style="font-size: 1.5rem; padding: 10px 30px;">★ FINALIS LINDA 2026 ★</span>
+                <span class="badge-eco reveal">★ FINALIS LINDA 2026 ★</span>
                 <div class="reveal mt-3">
                     <h1 class="game-title">Sort The Trash</h1>
                     <p class="game-subtitle">Game Edukasi Interaktif</p>
