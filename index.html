@@ -97,6 +97,7 @@
             display: flex; width: 100vw; height: 100vh; overflow-x: auto; 
             scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none;
             position: relative; z-index: 2;
+            -webkit-overflow-scrolling: touch;
         }
         .horizontal-container::-webkit-scrollbar { display: none; }
         .slide-section {
@@ -311,9 +312,27 @@
                 padding: 1.5rem !important;
                 margin: 0 auto !important;
                 max-height: 88vh !important;
-                overflow-y: auto;
+                overflow-y: visible !important; /* MATIKAN SCROLL DI CARD */
+                overflow-x: visible !important;
                 border-radius: 25px !important;
                 border-width: 3px !important;
+            }
+
+            /* MATIKAN SCROLL DI SEMUA ELEMEN DALAM CARD */
+            .glass-card * {
+                overflow-y: visible !important;
+                overflow-x: visible !important;
+            }
+
+            /* KHUSUS UNTUK HIDDEN MATERI - TETAP BISA DI-CLICK TANPA SCROLL */
+            .hidden-materi {
+                max-height: 0 !important;
+                overflow: hidden !important;
+                transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            }
+            .hidden-materi.show {
+                max-height: 500px !important;
+                overflow-y: visible !important;
             }
 
             .doc-entry-row { flex-direction: column !important; gap: 10px !important; margin-bottom: 30px !important; padding: 10px !important; text-align: center; }
