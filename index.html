@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sort The Trash | Tim DAKARA - Finalis LINDA 2026</title>
+    <!-- Framework & Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Luckiest+Guy&display=swap" rel="stylesheet">
+    
+    <style> 
+        :root {
+            /* WARNA LOGO */
+            --bg-bright: #fffcf0;   
+            --forest: #facc15;      
+            --ocean: #f59e0b;       
+            --warning: #f59e0b;     
+            --danger: #ef4444;
+            --text-dark: #451a03;   
+            --glass-card: rgba(255, 255, 255, 0.88);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        /* BACKGROUND UNIQUE UPGRADE */
+        body { 
+            background-color: var(--bg-bright); 
+            color: var(--text-dark); 
+            overflow: hidden; 
+            background: linear-gradient(135deg, #fffcf0 0%, #fef3c7 50%, #fffcf0 100%);
+            background-size: 400% 400%;
+            animation: mesh-gradient 15s ease infinite;
+        }
+
+        @keyframes mesh-gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* GLOW BLOBS */
+        .glow-container {
+            position: fixed; width: 100%; height: 100%; top: 0; left: 0;
+            z-index: 0; pointer-events: none; overflow: hidden;
+        }
+        .glow-blob {
+            position: absolute; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(250, 204, 21, 0.25) 0%, rgba(250, 204, 21, 0) 70%);
+            border-radius: 50%; filter: blur(80px);
+            animation: float-glow 20s infinite alternate ease-in-out;
+        }
+        .glow-blob:nth-child(2) { background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0) 70%); width: 800px; height: 800px; animation-duration: 25s; animation-delay: -5s; }
+
+        @keyframes float-glow {
+            0% { transform: translate(-10%, -10%) scale(1); }
+            100% { transform: translate(50%, 50%) scale(1.2); }
+        }
+
+        /* --- STYLES SPLASH SCREEN --- */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #ffffff 0%, #fef3c7 100%);
+            z-index: 10001; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: all 0.8s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+        #splash-screen.hidden { opacity: 0; transform: scale(1.5); pointer-events: none; }
+        .splash-logo-main {
+            width: 500px; max-width: 80vw; border-radius: 40px;
+            box-shadow: 0 20px 50px rgba(69, 26, 3, 0.15); margin-bottom: 40px;
+            animation: float 3s ease-in-out infinite;
+        }
+        .splash-team-name { font-size: 6rem; font-weight: 800; color: var(--text-dark); margin-bottom: 5px; line-height: 1; }
+        .splash-school-name { font-size: 2.5rem; font-weight: 700; color: var(--warning); margin-bottom: 50px; }
+        .play-btn {
+            background: var(--forest); color: var(--text-dark); border: 5px solid var(--text-dark);
+            width: 150px; height: 150px; border-radius: 50%; font-size: 4.5rem;
+            cursor: pointer; box-shadow: 0 8px 0 var(--text-dark); animation: pulse-play 2s infinite;
+            display: flex; align-items: center; justify-content: center; transition: 0.3s;
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        .play-btn:hover { transform: scale(1.1); background: var(--warning); }
+        @keyframes pulse-play {
+            0% { box-shadow: 0 8px 0 var(--text-dark), 0 0 0 0 rgba(250, 204, 21, 0.7); }
+            70% { box-shadow: 0 8px 0 var(--text-dark), 0 0 0 40px rgba(250, 204, 21, 0); }
+            100% { box-shadow: 0 8px 0 var(--text-dark), 0 0 0 0 rgba(250, 204, 21, 0); }
+        }
+
+        /* --- BACKGROUND SAMPAH --- */
+        #interactive-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        .small-trash { position: absolute; opacity: 0.3; transition: transform 0.1s ease-out; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.05)); }
+
+        /* --- HORIZONTAL SYSTEM --- */
+        .horizontal-container {
+            display: flex; width: 100vw; height: 100vh; overflow-x: auto; 
+            scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none;
+            position: relative; z-index: 2;
+        }
+        .horizontal-container::-webkit-scrollbar { display: none; }
+        .slide-section {
+            min-width: 100vw; height: 100vh; scroll-snap-align: start;
+            display: flex; align-items: center; justify-content: flex-start;
+            padding: 0 5%; position: relative;
+        }
+
+        /* --- ANIMASI IKON --- */
+        @keyframes ani-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .ani-rotate { animation: ani-rotate 10s linear infinite; }
+        @keyframes ani-strike {
+            0% { transform: rotate(0deg); transform-origin: bottom right; }
+            40% { transform: rotate(-45deg); transform-origin: bottom right; }
+            60% { transform: rotate(0deg); transform-origin: bottom right; }
+            100% { transform: rotate(0deg); transform-origin: bottom right; }
+        }
+        .active .ani-strike { animation: ani-strike 1s ease-out forwards; }
+        @keyframes ani-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .active .ani-pulse { animation: ani-pulse 2s ease-in-out infinite; }
+        @keyframes ani-float { 0% { transform: translateY(0); } 50% { transform: translateY(-30px); } 100% { transform: translateY(0); } }
+        .active .ani-float { animation: ani-float 3s ease-in-out infinite; }
+
+        /* --- HIASAN IKON & ANIMASI --- */
+        .ornament-wrapper {
+            position: absolute; right: 5%; top: 50%; transform: translateY(-50%) translateX(100px);
+            opacity: 0; z-index: -1; transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none;
+        }
+        .active .ornament-wrapper { opacity: 1; transform: translateY(-50%) translateX(0); }
+        .hero-icon { font-size: 35rem; display: block; }
+        
+        .isu-globe-small { position: absolute !important; top: -80px !important; right: -50px !important; left: auto !important; transform: none !important; z-index: 100 !important; }
+        .isu-globe-small .hero-icon { font-size: 5rem !important; }
+
+        .slide-section:nth-child(5) .glass-card p { font-weight: 800 !important; color: #1a1a1a; }
+
+        .isu-photo-grid {
+            position: absolute; right: 8%; bottom: 12%;
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
+            opacity: 0; transform: translateX(50px);
+            transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s;
+            z-index: 15;
+        }
+        .active .isu-photo-grid { opacity: 1; transform: translateX(0); }
+        .isu-row-top { display: flex; gap: 15px; }
+        .isu-row-bottom { display: flex; justify-content: center; width: 100%; }
+        .isu-img-v2 { width: 480px; height: 350px; object-fit: cover; border: 8px solid white; border-radius: 12px; box-shadow: 8px 8px 20px rgba(0,0,0,0.15); transition: 0.3s; }
+        .isu-img-v2:hover { transform: scale(1.1); z-index: 20; }
+
+        /* --- STYLE KHUSUS MANFAAT INOVASI (SLIDE 11) --- */
+        .card-manfaat { background: #ffffff !important; border: 4px solid var(--text-dark); color: var(--text-dark) !important; box-shadow: 8px 8px 0px var(--text-dark); transition: 0.3s; }
+        .card-manfaat h4 { font-weight: 800; margin-bottom: 15px; }
+        .card-manfaat p { font-weight: 600; font-size: 1.2rem; }
+        .border-blue { border-top: 12px solid #0d6efd !important; }
+        .border-red { border-top: 12px solid #ef4444 !important; }
+        .border-yellow { border-top: 12px solid #facc15 !important; }
+
+        .btn-linktree { background: var(--forest); color: var(--text-dark); font-weight: 800; padding: 15px 40px; border-radius: 50px; text-decoration: none; display: inline-block; border: 4px solid var(--text-dark); box-shadow: 6px 6px 0 var(--text-dark); transition: 0.3s; font-size: 1.4rem; }
+        .btn-linktree:hover { transform: translateY(-5px); box-shadow: 10px 10px 0 var(--text-dark); background: var(--warning); color: var(--text-dark); }
+
+        .photo-stack-right { position: absolute; right: 8%; top: 50%; transform: translateY(-50%) translateX(100px); opacity: 0; z-index: 15; transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; flex-direction: column; align-items: center; gap: 30px; }
+        .active .photo-stack-right { opacity: 1; transform: translateY(-50%) translateX(0); }
+        .tilted-photo { width: 480px; height: 280px; object-fit: cover; border: 15px solid white; border-radius: 12px; box-shadow: 10px 10px 25px rgba(0,0,0,0.2); transition: 0.3s; }
+        .tilted-photo:hover { transform: scale(1.1) rotate(0deg) !important; z-index: 20; }
+        .pic-1 { transform: rotate(-7deg); }
+        .pic-2 { transform: rotate(5deg); }
+        .pic-3 { transform: rotate(-3deg); }
+
+        .result-stack-wrapper { position: absolute; right: 29%; top: 20%; transform: translateY(-50%) translateX(100px); opacity: 0; z-index: 15; transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; flex-direction: column; align-items: center; }
+        .active .result-stack-wrapper { opacity: 1; transform: translateY(-50%) translateX(0); }
+        .res-photo { width: 900px; height: 550px; object-fit: fill; border: 20px solid white; box-shadow: 15px 15px 30px rgba(0,0,0,0.2); position: absolute; transition: 0.4s; }
+
+        .glass-card-doc { max-width: 95% !important; height: 85vh; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--warning) transparent; }
+        .glass-card-doc::-webkit-scrollbar { width: 10px; }
+        .glass-card-doc::-webkit-scrollbar-thumb { background: var(--warning); border-radius: 10px; }
+        .doc-entry-row { display: flex; align-items: center; gap: 50px; margin-bottom: 80px; padding: 20px; border-bottom: 2px dashed #e2e8f0; }
+        .doc-entry-row:last-child { border-bottom: none; }
+        .doc-entry-row:nth-child(even) { flex-direction: row-reverse; }
+        .doc-img-wrapper { flex: 1.2; position: relative; }
+        .doc-img-wrapper img { width: 100%; height: 500px; object-fit: cover; border: 15px solid white; border-radius: 20px; box-shadow: 15px 15px 30px rgba(0,0,0,0.1); transition: 0.4s; }
+        .doc-img-wrapper:hover img { transform: scale(1.02); }
+        .doc-content-wrapper { flex: 0.8; }
+        .doc-content-wrapper h3 { font-size: 2.8rem; font-weight: 800; color: var(--text-dark); margin-bottom: 20px; }
+        .doc-content-wrapper p { font-size: 1.5rem; color: #4b5563; line-height: 1.6; }
+        .doc-step-badge { background: var(--warning); color: var(--text-dark); padding: 5px 20px; border-radius: 50px; font-weight: 800; display: inline-block; margin-bottom: 15px; font-size: 1.1rem; }
+
+        .glass-card {
+            background: var(--glass-card); backdrop-filter: blur(25px); border-radius: 40px 80px 40px 80px;
+            padding: 3.5rem; border: 4px solid var(--text-dark); position: relative;
+            box-shadow: 15px 15px 40px rgba(69, 26, 3, 0.1); 
+            max-width: 1100px; width: 100%;
+            opacity: 0; transform: scale(0.9) translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); z-index: 10;
+        }
+        .active .glass-card { opacity: 1; transform: scale(1) translateY(0); }
+        .card-results { max-width: 750px !important; margin-left: 0 !important; }
+        .reveal { opacity: 0; transform: translateY(20px); transition: 0.6s ease-out; }
+        .active .reveal { opacity: 1; transform: translateY(0); }
+        
+        /* --- PERUBAHAN WARNA BOX KECIL (MATERI) --- */
+        .list-item { 
+            background: var(--text-dark); /* Latar belakang gelap */
+            color: #ffffff;               /* Teks putih terang */
+            border: 2.5px solid #ffffff;  /* Border putih agar kontras */
+            border-radius: 15px; 
+            padding: 18px 28px; 
+            margin-bottom: 18px; 
+            display: flex; 
+            align-items: center; 
+            box-shadow: 5px 5px 0px var(--forest); 
+            font-size: 1.6rem; 
+            font-weight: 700; 
+            opacity: 0; 
+            transform: translateY(15px); 
+            transition: all 0.4s ease-out; 
+        }
+        .active .list-item { opacity: 1; transform: translateY(0); }
+        .clickable-item { cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; display: block !important; }
+        .clickable-item:hover { background: #5c2606; transform: translateY(-2px); }
+        
+        .hidden-materi { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+            font-size: 1.2rem; 
+            font-weight: 600; 
+            color: #e2e8f0; /* Warna teks isi materi putih keabuan agar jelas */
+            line-height: 1.6; 
+            margin-top: 0; 
+        }
+        .hidden-materi.show { max-height: 500px; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ffffff; }
+
+        /* --- STYLES JUDUL (TIDAK PECAH) --- */
+        h1 { font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 1rem; }
+        
+        h2 { 
+            font-size: 3.5rem; 
+            font-weight: 800; 
+            color: var(--forest); /* Warna teks isi */
+            /* Paint order stroke fill memastikan stroke digambar di belakang teks agar tidak pecah */
+            paint-order: stroke fill;
+            -webkit-text-stroke: 8px var(--text-dark); /* Stroke cokelat tebal */
+            margin-bottom: 2.5rem; 
+            display: flex; 
+            align-items: center; 
+        }
+        /* Icon di dalam h2 tidak boleh kena stroke */
+        h2 i { -webkit-text-stroke: 0 !important; color: var(--text-dark); margin-right: 20px; }
+
+        h4 { font-size: 2.2rem; font-weight: 800; }
+
+        /* --- EDITAN: STROKE UNTUK SUB JUDUL --- */
+        .sub-stroke {
+            paint-order: stroke fill;
+            -webkit-text-stroke: 6px var(--text-dark);
+            font-weight: 800;
+        }
+        .text-kuning { color: var(--forest) !important; }
+        .text-hijau { color: #22c55e !important; } 
+
+        p { font-size: 1.4rem; line-height: 1.4; }
+        .badge-eco { background: var(--warning); color: var(--text-dark); padding: 0.7rem 1.8rem; border-radius: 50px; font-weight: 800; display: inline-block; margin-bottom: 2rem; border: 3px solid var(--text-dark); box-shadow: 4px 4px 0 var(--text-dark); }
+
+        .nav-dots { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 1000; }
+        .dot { width: 15px; height: 15px; border-radius: 50%; background: #cbd5e1; border: 1px solid var(--text-dark); cursor: pointer; transition: 0.3s; }
+        .dot.active { background: var(--forest); width: 45px; border-radius: 12px; }
+        .side-btn { position: fixed; top: 50%; transform: translateY(-50%); background: var(--forest); border: 3px solid var(--text-dark); width: 65px; height: 65px; border-radius: 50%; box-shadow: 4px 4px 0 var(--text-dark); z-index: 1000; cursor: pointer; font-size: 1.5rem; transition: 0.3s; color: var(--text-dark); }
+
+        /* HERO TITLE UPGRADE - STROKE LEBIH TEBAL */
+        .game-title { 
+            font-family: 'Luckiest Guy', cursive !important; 
+            font-size: 8rem !important; 
+            color: var(--forest); 
+            paint-order: stroke fill;
+            -webkit-text-stroke: 20px var(--text-dark); /* DITEBALKAN DARI 10px KE 20px */
+            text-shadow: 8px 8px 0px rgba(69, 26, 3, 0.2); 
+            letter-spacing: 2px; 
+            line-height: 1.1; 
+            margin-bottom: 20px; 
+            white-space: nowrap; 
+        }
+        .game-subtitle { font-size: 2.8rem; font-weight: 700; color: var(--text-dark); text-transform: uppercase; background: var(--warning); display: inline-block; padding: 8px 35px; border-radius: 20px; border: 3px solid var(--text-dark); }
+        .edan01{ letter-spacing: 0.1px; }
+
+        /* Style Logo Baris Bawah (Sangat Kecil) */
+        .logo-row { display: flex; justify-content: center; gap: 20px; margin-top: 30px; }
+        .small-logo-img { width: 75px; height: 75px; object-fit: contain; border: none; background: transparent; }
+
+        
+    </style>
+</head>
+<body>
+
+    <!-- UNIQUE GLOW BACKGROUND -->
+    <div class="glow-container">
+        <div class="glow-blob"></div>
+        <div class="glow-blob"></div>
+    </div>
+
+    <!-- SPLASH SCREEN -->
+    <div id="splash-screen">
+        <div class="text-center">
+            <img src="logo.jpg" alt="Logo" class="splash-logo-main">
+            <h1 class="splash-team-name">Tim DAKARA</h1>
+            <p class="splash-school-name">SMAN 2 Padalarang</p>
+            <button class="play-btn mx-auto" id="btnPlay"><i class="fas fa-play ms-2"></i></button>
+            <p class="mt-4 fw-bold text-dark fs-4">Klik Untuk Memulai</p>
+        </div>
+    </div>
+
+    <div id="interactive-bg"></div>
+    <div class="nav-dots" id="dotNav"></div>
+    <button class="side-btn" style="left: 25px;" onclick="slide(-1)"><i class="fas fa-chevron-left"></i></button>
+    <button class="side-btn" style="right: 25px;" onclick="slide(1)"><i class="fas fa-chevron-right"></i></button>
+
+    <div class="horizontal-container" id="slider">
+        
+        <!-- SLIDE 1: JUDUL -->
+        <section class="slide-section" style="justify-content: center; align-items: center; text-align: center;">
+            <div class="ornament-wrapper" style="left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.1; z-index: 0; pointer-events: none;">
+                <i class="fas fa-recycle hero-icon ani-rotate" style="color: var(--forest); font-size: 55rem;"></i>
+            </div>
+            
+            <div class="glass-card" style="margin: 0; z-index: 10;">
+                <span class="badge-eco reveal" style="font-size: 1.5rem; padding: 10px 30px;">★ FINALIS LINDA 2026 ★</span>
+                <div class="reveal mt-3">
+                    <h1 class="game-title">Sort The Trash</h1>
+                    <p class="game-subtitle">Game Edukasi Interaktif</p>
+                </div>
+                <div class="mt-5 reveal">
+                    <div class="d-flex flex-column align-items-center">
+                        <h2 class="mb-1" style="font-size: 4rem; -webkit-text-stroke: 8px var(--text-dark);">Tim DAKARA</h2>
+                        <div style="width: 80px; height: 6px; background: var(--warning); border-radius: 10px; margin: 10px 0;"></div>
+                        <h3 style="font-size: 2.2rem; font-weight: 800; color: var(--warning); letter-spacing: 1px;">SMAN 2 Padalarang</h3>
+                    </div>
+                </div>
+
+                <!-- BARIS LOGO -->
+                <div class="logo-row reveal">
+                    <img src="logo1.png" class="small-logo-img" alt="Logo 1">
+                    <img src="logo2.png" class="small-logo-img" alt="Logo 2">
+                    <img src="logo3.png" class="small-logo-img" alt="Logo 3">
+                    <img src="logo4.png" class="small-logo-img" alt="Logo 4">
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: PROFIL -->
+        <section class="slide-section">
+            <div class="ornament-wrapper"><i class="fas fa-users-gear hero-icon ani-pulse" style="color: var(--forest);"></i></div>
+            <div class="glass-card">
+                <h2 class="reveal"><i class="fas fa-id-card"></i>Profil Anggota Tim</h2>
+                <div class="row g-4 reveal">
+                    <div class="col-md-6"><div class="list-item"><i class="fas fa-laptop-code me-3 text-warning"></i><div><div class="fw-bold" style="font-size:1.8rem;">Deas</div><div style="font-size:1.2rem; font-weight:400; color: #e2e8f0;">Game Developer</div></div></div></div>
+                    <div class="col-md-6"><div class="list-item"><i class="fas fa-palette me-3 text-primary"></i><div><div class="fw-bold" style="font-size:1.8rem;">Kathan</div><div style="font-size:1.2rem; font-weight:400; color: #e2e8f0;">Game Artist</div></div></div></div>
+                    <div class="col-md-6"><div class="list-item"><i class="fas fa-magnifying-glass-chart me-3 text-warning"></i><div><div class="fw-bold" style="font-size:1.8rem;">Radit</div><div style="font-size:1.2rem; font-weight:400; color: #e2e8f0;">Game Researcher</div></div></div></div>
+                    <div class="col-md-6"><div class="list-item" style="border-left: 8px solid var(--forest);"><i class="fas fa-chalkboard-user me-3 text-danger"></i><div><div class="fw-bold" style="font-size:1.8rem;">Mr. Good</div><div style="font-size:1.2rem; font-weight:400; color: #e2e8f0;">Pembimbing</div></div></div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: DASAR HUKUM -->
+        <section class="slide-section">
+            <div class="ornament-wrapper"><i class="fas fa-gavel hero-icon ani-strike"></i></div>
+            <div class="glass-card">
+                <h2 class="reveal"><i class="fas fa-balance-scale"></i>Dasar Hukum</h2>
+                <div class="col-12">
+                    <div class="list-item">1. SK Bupati Bandung Barat No. 100.3.3.2/Kep.681/2025</div>
+                    <div class="list-item">2. SK Kepala SMAN 2 Padalarang No 805/1542.1/2025</div>
+                    
+                    <!-- Poin 3 -->
+                    <div class="list-item clickable-item" onclick="toggleMateri('materi-3', 'arrow-3')">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <span>3. UU No. 18 Tahun 2008 tentang Pengelolaan Sampah</span>
+                            <i class="fas fa-chevron-down ms-3" id="arrow-3" style="color:white; -webkit-text-stroke: 0;"></i>
+                        </div>
+                        <div class="hidden-materi" id="materi-3">
+                            Undang-undang ini merupakan payung hukum utama yang mengatur mengenai pengelolaan sampah di Indonesia secara komprehensif, mulai dari pengurangan sampah hingga penanganan sampah dengan prinsip ramah lingkungan guna meningkatkan kesehatan masyarakat dan kualitas lingkungan.
+                        </div>
+                    </div>
+
+                    <!-- Poin 4 -->
+                    <div class="list-item clickable-item" onclick="toggleMateri('materi-4', 'arrow-4')">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <span>4. Peraturan Bupati (Perbup) No 19 Tahun 2024</span>
+                            <i class="fas fa-chevron-down ms-3" id="arrow-4" style="color:white; -webkit-text-stroke: 0;"></i>
+                        </div>
+                        <div class="hidden-materi" id="materi-4">
+                            Peraturan Bupati (Perbup) No. 19 Tahun 2024: Memuat Rencana Induk Pengelolaan Sampah (RIPS) KBB yang berlaku untuk jangka panjang (2024–2044) demi menciptakan sistem yang komprehensif.
+                        </div>
+                    </div>
+
+                    <div class="list-item">5. PP No. 27 Thn 2020 (Sampah Spesifik)</div>
+                    <div class="list-item">6. Perpres No. 97 Thn 2017 (Jakstranas)</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: PERMASALAHAN -->
+        <section class="slide-section">
+            <div class="photo-stack-right">
+                <img src="masalah1.jpg" class="tilted-photo pic-1">
+                <img src="masalah2.jpg" class="tilted-photo pic-2">
+                <img src="masalah3.jpg" class="tilted-photo pic-3">
+            </div>
+            <div class="glass-card">
+                <h2 class="reveal" style="color: var(--danger);"><i class="fas fa-search"></i>Permasalahan</h2>
+                <div class="row g-4">
+                    <div class="col-md-6 reveal">
+                        <div class="p-4 rounded-4 shadow-sm" style="background:#fff1f2; border: 1px solid #fecaca; height: 100%;">
+                            <h4 class="sub-stroke text-danger mb-4">Masalah Makro</h4>
+                            <div class="list-item">Krisis sampah di Kab. Bandung Barat</div>
+                            <div class="list-item">Kapasitas TPA yang terbatas</div>
+                            <div class="list-item">Rendahnya budaya pilah sampah</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 reveal">
+                        <div class="p-4 rounded-4 shadow-sm" style="background:#fffbeb; border: 1px solid #fde68a; height: 100%;">
+                            <h4 class="sub-stroke text-kuning mb-4">Masalah Mikro</h4>
+                            <div class="list-item">Pemahaman siswa yang rendah</div>
+                            <div class="list-item">Media edukasi konvensional</div>
+                            <div class="list-item">Sulit mengukur pemahaman nyata</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: ISU STRATEGIS -->
+        <section class="slide-section">
+            <div class="isu-photo-grid">
+                <div class="isu-row-top">
+                    <img src="isu12.jpg" class="isu-img-v2">
+                </div>
+                <div class="isu-row-bottom">
+                    <img src="isu2.jpg" class="isu-img-v2">
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <div class="ornament-wrapper isu-globe-small">
+                    <i class="fas fa-globe-asia hero-icon ani-rotate" style="color: var(--forest);"></i>
+                </div>
+
+                <h2 class="reveal"><i class="fas fa-bullseye"></i>Isu Strategis</h2>
+                <div class="row g-4 reveal text-center">
+                    <div class="col-md-4">
+                        <div class="p-4 bg-white rounded-4 shadow-sm border-bottom border-5 border-primary h-100">
+                            <h4 class="sub-stroke text-primary mb-3" style="font-size: 2.2rem;">Global (SDGs)</h4>
+                            <p style="font-size: 1.4rem; font-weight: 600; line-height: 1.5;">Kota Berkelanjutan & Konsumsi Bertanggung Jawab.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-4 bg-white rounded-4 shadow-sm border-bottom border-5 border-danger h-100">
+                            <h4 class="sub-stroke text-danger mb-3" style="font-size: 2.2rem;">Nasional</h4>
+                            <p style="font-size: 1.4rem; font-weight: 600; line-height: 1.5;">Target Jakstranas: Reduksi 30%, Penanganan 70%.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-4 bg-white rounded-4 shadow-sm border-bottom border-5 border-warning h-100">
+                            <h4 class="sub-stroke text-kuning mb-3" style="font-size: 2.2rem;">Daerah</h4>
+                            <p style="font-size: 1.4rem; font-weight: 600; line-height: 1.5;">Darurat Sampah KBB & Urgensi Media Digital.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6: METODE PEMBAHARUAN -->
+        <section class="slide-section">
+            <div class="photo-stack-right" style="gap: 15px;">
+                <img src="metode_potrait.jpg" alt="Potrait" style="width: 280px; height: 380px; object-fit: cover; border: 12px solid white; border-radius: 20px; box-shadow: 10px 10px 30px rgba(0,0,0,0.15);">
+                <i class="fas fa-sync-alt ani-rotate" style="font-size: 4rem; color: var(--forest);"></i>
+                <img src="metode_landscape.jpg" alt="Landscape" style="width: 440px; height: 280px; object-fit: cover; border: 12px solid white; border-radius: 20px; box-shadow: 10px 10px 30px rgba(0,0,0,0.15);">
+            </div>
+
+            <div class="glass-card">
+                <h2 class="reveal"><i class="fas fa-arrows-rotate"></i>Metode Pembaharuan</h2>
+                <div class="row g-4 reveal">
+                    <div class="col-md-6">
+                        <div class="p-4 rounded-4 shadow-sm" style="background:#fff1f2; border: 1px solid #fecaca; height: 100%;">
+                            <h4 class="sub-stroke text-danger mb-3">Sebelum Inovasi</h4>
+                            <div class="list-item">Ceramah & Seminar pasif</div>
+                            <div class="list-item">Brosur & Media cetak</div>
+                            <div class="list-item">Tanpa indikator pengukuran</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-4 rounded-4 shadow-sm" style="background:#f0fdf4; border: 1px solid #bbf7d0; height: 100%;">
+                            <h4 class="sub-stroke text-hijau mb-3">Setelah Inovasi</h4>
+                            <div class="list-item">Pendekatan Modern</div>
+                            <div class="list-item">Edukasi Berbasis Game</div>
+                            <div class="list-item">Skor sebagai alat ukur pemahaman</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: KEUNGGULAN -->
+        <section class="slide-section">
+            <div class="ornament-wrapper"><i class="fas fa-star hero-icon ani-pulse" style="color: var(--warning);"></i></div>
+            <div class="glass-card">
+                <h2 class="reveal"><i class="fas fa-award"></i>Keunggulan & Kebaharuan</h2>
+                <div class="row g-4 reveal">
+                    <div class="col-md-6">
+                        <h4 class="sub-stroke text-kuning mb-4">Keunggulan</h4>
+                        <div class="list-item">✅ Web-based, tanpa instalasi</div>
+                        <div class="list-item">✅ Multiplatform (Smartphone/PC)</div>
+                        <div class="list-item">✅ User Friendly</div>
+                        <div class="list-item">✅ Bisa di Kustomisasi</div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4 class="sub-stroke text-kuning mb-4">Kebaharuan</h4>
+                        <div class="list-item">✨ Permainan interaktif edukasi</div>
+                        <div class="list-item">✨ Mengubah belajar pasif ke aktif</div>
+                        <div class="list-item">✨ Pengalaman belajar menyenangkan</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8: SPESIFIKASI -->
+        <section class="slide-section">
+            <div class="ornament-wrapper"><i class="fas fa-laptop-code hero-icon ani-rotate"></i></div>
+            <div class="glass-card">
+                <h2 class="reveal"><i class="fas fa-microchip"></i>Spesifikasi Produk</h2>
+                <div class="row g-4 reveal text-center">
+                    <div class="col-md-4">
+                        <div class="p-5 bg-white rounded-4 border-top border-5 border-primary h-100">
+                            <h4 class="sub-stroke text-primary mb-3">Teknologi</h4>
+                            <p style="font-size: 1.4rem; font-weight: 600;">HTML5, CSS3, JavaScript.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-5 bg-white rounded-4 border-top border-5 border-danger h-100">
+                            <h4 class="sub-stroke text-danger mb-3">Akses</h4>
+                            <p style="font-size: 1.4rem; font-weight: 600;">Browser HP/Laptop/Tablet.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-5 bg-white rounded-4 border-top border-5 border-warning h-100">
+                            <h4 class="sub-stroke text-kuning mb-3">User</h4>
+                            <p style="font-size: 1.4rem; font-weight: 600;">Siswa & Masyarakat Umum.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-5 reveal">
+                    <a href="https://linktr.ee/Sort_The_Trash" target="_blank" class="btn-linktree">
+                        <i class="fas fa-link me-2"></i> Linktree Sort The Trash
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 9: TUJUAN -->
+        <section class="slide-section">
+            <div class="ornament-wrapper"><i class="fas fa-crosshairs hero-icon ani-pulse" style="color: var(--danger);"></i></div>
+            <div class="glass-card">
+                <h2 class="reveal" style="color: var(--danger);"><i class="fas fa-crosshairs"></i>Tujuan Inovasi</h2>
+                <div class="reveal">
+                    <div class="list-item">1. Meningkatkan pemahaman siswa tentang pemilahan sampah.</div>
+                    <div class="list-item">2. Menumbuhkan kesadaran menjaga lingkungan.</div>
+                    <div class="list-item">3. Membentuk karakter peduli lingkungan sejak dini.</div>
+                    <div class="list-item">4. Mendukung pengurangan volume sampah di Kab. Bandung Barat.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 10: MANFAAT -->
+        <section class="slide-section">
+            <div class="ornament-wrapper"><i class="fas fa-heart hero-icon ani-pulse" style="color: var(--danger);"></i></div>
+            <div class="glass-card">
+                <h2 class="reveal"><i class="fas fa-hand-holding-heart"></i>Manfaat Inovasi</h2>
+                <div class="row g-4 reveal text-center">
+                    <div class="col-md-4">
+                        <div class="p-5 rounded-5 card-manfaat border-blue h-100">
+                            <h4 class="sub-stroke text-primary mb-3">Bagi Siswa</h4>
+                            <p style="font-size: 1.4rem; font-weight: 600;">Belajar seru, literasi ekologi praktis.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-5 rounded-5 card-manfaat border-red h-100">
+                            <h4 class="sub-stroke text-danger mb-3">Bagi Sekolah</h4>
+                            <p style="font-size: 1.4rem; font-weight: 600;">Dukung program Adiwiyata.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-5 rounded-5 card-manfaat border-yellow h-100">
+                            <h4 class="sub-stroke text-kuning mb-3">Bagi Daerah</h4>
+                            <p style="font-size: 1.4rem; font-weight: 600;">Reduksi beban TPA.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11: HASIL -->
+        <section class="slide-section" style="justify-content: flex-start;">
+            <div class="result-stack-wrapper">
+                <img src="hasil_inovasi.jpg" class="res-photo res-1">
+            </div>
+            <div class="glass-card card-results">
+                <h2 class="reveal"><i class="fas fa-award"></i>Hasil Inovasi</h2>
+                <div class="row g-4 reveal">
+                    <div class="col-12">
+                        <h4 class="fw-bold border-bottom pb-3 mb-4">Output</h4>
+                        <div class="list-item">● Produk Game Web "Sort The Trash"</div>
+                        <div class="list-item">● Sistem penilaian skor otomatis</div>
+                        <h4 class="fw-bold border-bottom pb-3 mb-4 mt-5">Outcome</h4>
+                        <div class="list-item">● Pemahaman siswa meningkat</div>
+                        <div class="list-item">● Perilaku peduli lingkungan terbentuk</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+         <!-- SLIDE 12: KEBERLANJUTAN -->
+        <section class="slide-section">
+            <div class="ornament-wrapper"><i class="fas fa-route hero-icon ani-float" style="color: var(--forest);"></i></div>
+            <div class="glass-card">
+                <h2 class="reveal"><i class="fas fa-map-location-dot"></i>Keberlanjutan Inovasi</h2>
+                <div class="row g-4 reveal text-center">
+                    <div class="col-md-4">
+                        <div class="p-5 border-top border-5 border-primary bg-white shadow-sm h-100">
+                            <h4 class="sub-stroke text-primary mb-3">Pendek</h4>
+                            <p style="font-size: 1.4rem; font-weight: 600;">Update Fitur & Konten Edukasi.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-5 border-top border-5 border-warning bg-white shadow-sm h-100">
+                            <h4 class="sub-stroke text-kuning mb-3">Menengah</h4>
+                            <p style="font-size: 1.4rem; font-weight: 600;">Sebaran ke Seluruh Sekolah di KBB & menjadi bagian kegiatan MPLS.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-5 border-top border-5 border-warning bg-white shadow-sm h-100">
+                            <h4 class="sub-stroke text-kuning mb-3">Panjang</h4>
+                            <p style="font-size: 1.4rem; font-weight: 600;">Implementasi Skala Nasional.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 13: DOKUMENTASI -->
+        <section class="slide-section">
+            <div class="glass-card glass-card-doc reveal">
+                <h2 class="py-3 mb-5" style="border-bottom: 4px solid var(--warning);">
+                    <i class="fas fa-camera-retro"></i>Dokumentasi Projek
+                </h2>
+                <div class="doc-entry-row">
+                    <div class="doc-img-wrapper"><img src="Deas01.jpg" alt="Tahap 1"></div>
+                    <div class="doc-content-wrapper">
+                        <span class="doc-step-badge">25 Februari 2026</span>
+                        <h3>Penjaringan Ide</h3>
+                        <p>Kami memulai dengan menganalisis data timbulan sampah di Kabupaten Bandung Barat dan mengidentifikasi rendahnya tingkat pemilahan sampah di kalangan pelajar sekolah menengah.</p>
+                    </div>
+                </div>
+                <div class="doc-entry-row">
+                    <div class="doc-img-wrapper"><img src="Deas02.jpg" alt="Tahap 2"></div>
+                    <div class="doc-content-wrapper">
+                        <span class="doc-step-badge">27 Februari 2026</span>
+                        <h3>Mempelajari Coding</h3>
+                        <p>Proses pembuatan aset visual dan coding mekanik permainan menggunakan HTML5 and JavaScript. Fokus utama adalah menciptakan antarmuka yang ceria dan intuitif bagi pengguna.</p>
+                    </div>
+                </div>
+                <div class="doc-entry-row">
+                    <div class="doc-img-wrapper"><img src="Deas03.jpg" alt="Tahap 3"></div>
+                    <div class="doc-content-wrapper">
+                        <span class="doc-step-badge">25 April 2026</span>
+                        <h3>Green Talk Show</h3>
+                        <p>Mengintegrasikan materi pemilahan sampah organik, anorganik, dan B3 </p>
+                    </div>
+                </div>
+                <div class="doc-entry-row">
+                    <div class="doc-img-wrapper"><img src="Deas04.jpg" alt="Tahap 4"></div>
+                    <div class="doc-content-wrapper">
+                        <span class="doc-step-badge">4 Mei 2026</span>
+                        <h3>Wawancara bank duitin</h3>
+                        <p>Melakukan Kolaborasi dengan Bank Duitin.</p>
+                    </div>
+                </div>
+                <div class="doc-entry-row">
+                    <div class="doc-img-wrapper"><img src="Deas05.jpg" alt="Tahap 5"></div>
+                    <div class="doc-content-wrapper">
+                        <span class="doc-step-badge">13 Mei 2026</span>
+                        <h3>Wawancara DLH</h3>
+                        <p>Memperkenalkan game "Sort The Trash" Kepada Dinas Lingkungan Hidup</p>
+                    </div>
+                </div>
+                <div class="doc-entry-row">
+                    <div class="doc-img-wrapper"><img src="Deas06.jpg" alt="Tahap 6"></div>
+                    <div class="doc-content-wrapper">
+                        <span class="doc-step-badge">18 Mei 2026</span>
+                        <h3>Penerapan Inovasi</h3>
+                        <p>menerapkan inovasi game "Sort The Trash" kepada Sekolah Adiwiyata SMPN 2 PADALARANG</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 14: PENUTUP -->
+        <section class="slide-section" style="justify-content: center; align-items: center; text-align: center;">
+            <div class="ornament-wrapper" style="left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.15; z-index: 0; pointer-events: none;">
+                <i class="fas fa-recycle hero-icon ani-rotate" style="color: var(--forest); font-size: 55rem;"></i>
+            </div>
+            
+            <div class="glass-card" style="margin: 0; z-index: 10;">
+                <i class="fas fa-recycle fa-5x text-warning mb-4 reveal"></i>
+                <h1 class="mb-4 reveal" style="font-size: 3.5rem;">"Generasi Emas Memilah Sampah Dengan Cerdas"</h1>
+                <div class="reveal mt-3">
+                    <h2 class="mb-1 justify-content-center" style="font-size: 3.2rem; -webkit-text-stroke: 8px var(--text-dark);">"Zero Waste Zero Cost"</h2>
+                    <div style="width: 100px; height: 6px; background: var(--warning); border-radius: 10px; margin: 20px auto;"></div>
+                    <h3 style="font-size: 2.2rem; font-weight: 800; color: var(--warning); letter-spacing: 2px;">TIM DAKARA</h3>
+                </div>
+                <button class="btn btn-warning btn-lg px-5 rounded-pill mt-5 py-3 reveal fw-bold border border-2 border-dark" onclick="goTo(0)" style="font-size: 1.5rem;">KEMBALI KE AWAL <i class="fas fa-home ms-2"></i></button>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const slider = document.getElementById('slider');
+        const sections = document.querySelectorAll('.slide-section');
+        const dotNav = document.getElementById('dotNav');
+        const bg = document.getElementById('interactive-bg');
+        const splash = document.getElementById('splash-screen');
+        const btnPlay = document.getElementById('btnPlay');
+
+        btnPlay.addEventListener('click', () => {
+            splash.classList.add('hidden');
+            setTimeout(() => { sections[0].classList.add('active'); }, 500);
+        });
+
+        // Fungsi toggle materi
+        function toggleMateri(materiId, arrowId) {
+            const materi = document.getElementById(materiId);
+            const arrow = document.getElementById(arrowId);
+            
+            materi.classList.toggle('show');
+            if(materi.classList.contains('show')) { 
+                arrow.style.transform = 'rotate(180deg)'; 
+            } else { 
+                arrow.style.transform = 'rotate(0deg)'; 
+            }
+        }
+
+        const icons = ['fa-apple-whole', 'fa-bottle-water', 'fa-leaf', 'fa-battery-empty', 'fa-box'];
+        const particles = [];
+
+        for (let i = 0; i < 40; i++) {
+            const item = document.createElement('i');
+            item.className = `fas ${icons[Math.floor(Math.random() * icons.length)]} small-trash`;
+            const x = Math.random() * 100;
+            const y = Math.random() * 100;
+            const size = Math.random() * 25 + 10;
+            
+            item.style.fontSize = size + 'px';
+            item.style.left = x + '%';
+            item.style.top = y + '%';
+            item.style.color = '#f59e0b';
+            
+            bg.appendChild(item);
+            particles.push({ element: item, x: x, y: y, factor: Math.random() * 0.05 });
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            const moveX = (e.clientX - window.innerWidth / 2) * 0.1;
+            const moveY = (e.clientY - window.innerHeight / 2) * 0.1;
+            
+            particles.forEach(p => {
+                p.element.style.transform = `translate(${moveX * p.factor * 10}px, ${moveY * p.factor * 10}px) rotate(${moveX * 0.1}deg)`;
+            });
+
+            const blobs = document.querySelectorAll('.glow-blob');
+            if(blobs.length >= 2) {
+                blobs[0].style.transform = `translate(${moveX * 0.2}px, ${moveY * 0.2}px)`;
+                blobs[1].style.transform = `translate(${moveX * -0.15}px, ${moveY * -0.15}px)`;
+            }
+        });
+
+        sections.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === 0 ? 'active' : ''}`;
+            dot.onclick = () => goTo(i);
+            dotNav.appendChild(dot);
+        });
+
+        const dots = document.querySelectorAll('.dot');
+        slider.addEventListener('scroll', () => {
+            const index = Math.round(slider.scrollLeft / window.innerWidth);
+            dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+            sections.forEach((sec, i) => i === index ? sec.classList.add('active') : sec.classList.remove('active'));
+        });
+
+        function slide(dir) { slider.scrollBy({ left: window.innerWidth * dir, behavior: 'smooth' }); }
+        function goTo(idx) { slider.scrollTo({ left: window.innerWidth * idx, behavior: 'smooth' }); }
+    </script>
+</body>
+</html>
